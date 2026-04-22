@@ -33,12 +33,54 @@ def hex_to_rgb(value: str) -> RGBColor:
     return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
 
+# Naming convention: keys ending in "_ink" are intended to render on
+# paper (#FFFFFF), keys ending in "_inv" on dark (#393939). We
+# pre-composite rgba over the implied background because python-pptx
+# RGBColor has no alpha channel. If a future variant needs the raw
+# rgba, add a parallel accessor — don't change the semantics here.
+_PAPER_BG = (0xFF, 0xFF, 0xFF)
+_DARK_BG  = (0x39, 0x39, 0x39)
+
+
+def _parse_rgba(value: str) -> tuple[int, int, int, float]:
+    inner = value[value.index("(") + 1:value.rindex(")")]
+    parts = [p.strip() for p in inner.split(",")]
+    r, g, b = int(parts[0]), int(parts[1]), int(parts[2])
+    a = float(parts[3]) if len(parts) >= 4 else 1.0
+    return r, g, b, a
+
+
+def _composite(rgba: tuple[int, int, int, float], bg: tuple[int, int, int]) -> RGBColor:
+    r, g, b, a = rgba
+    return RGBColor(
+        int(a * r + (1 - a) * bg[0]),
+        int(a * g + (1 - a) * bg[1]),
+        int(a * b + (1 - a) * bg[2]),
+    )
+
+
+def _to_rgb(key: str, value: str) -> RGBColor | None:
+    """Parse a token value into an RGBColor, or return None if unsupported."""
+    if not isinstance(value, str):
+        return None
+    if value.startswith("#"):
+        return hex_to_rgb(value)
+    if value.startswith("rgba"):
+        bg = _DARK_BG if key.endswith("_inv") else _PAPER_BG
+        return _composite(_parse_rgba(value), bg)
+    if value.startswith("rgb"):
+        rgba = _parse_rgba(value)
+        return RGBColor(rgba[0], rgba[1], rgba[2])
+    return None
+
+
 def _flatten(prefix: str, group: dict) -> dict[str, RGBColor]:
     out = {}
     for k, v in group.items():
         key = f"{prefix}_{k}".replace("-", "_")
-        if isinstance(v, str) and v.startswith("#"):
-            out[key] = hex_to_rgb(v)
+        parsed = _to_rgb(key, v)
+        if parsed is not None:
+            out[key] = parsed
     return out
 
 
