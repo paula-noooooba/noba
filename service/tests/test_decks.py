@@ -1,17 +1,20 @@
-"""End-to-end smoke test for the stub pipeline.
+"""End-to-end smoke test for the deck pipeline.
 
 Covers:
 - auth rejects missing / wrong key
 - POST /v1/decks (mode=text) returns outline + spec
-- POST /v1/decks (mode=pptx) returns a download URL
-- GET /v1/decks/:id/file streams back a valid .pptx
+- POST /v1/decks (mode=pptx) returns a download URL + valid .pptx
+- GET /v1/decks/:id/file streams back a .pptx
+- 404 on unknown id
+
+Tests set NOBA_STUB_CLAUDE=1 so the Claude API is not called. The real
+claude_runner is covered by test_integration.py, which is skipped
+unless ANTHROPIC_API_KEY is set.
 
 Run:
-    NOBA_API_KEY=test pytest -q
+    NOBA_API_KEY=test PYTHONPATH=. pytest -q
 """
 from __future__ import annotations
-
-import os
 
 import pytest
 from fastapi.testclient import TestClient
@@ -21,6 +24,7 @@ from fastapi.testclient import TestClient
 def _env(monkeypatch, tmp_path):
     monkeypatch.setenv("NOBA_API_KEY", "test-key")
     monkeypatch.setenv("NOBA_STORAGE_ROOT", str(tmp_path))
+    monkeypatch.setenv("NOBA_STUB_CLAUDE", "1")
 
 
 @pytest.fixture

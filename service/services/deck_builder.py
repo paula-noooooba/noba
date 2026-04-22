@@ -1,44 +1,47 @@
 """Render a DeckSpec to .pptx bytes.
 
-Step 1 (current): emits a minimal inline deck using python-pptx
-directly — just enough to prove the pipeline end-to-end. Each slide is
-a blank with the spec's `title` field written once in Helvetica.
+Imports `main` from the noba-presentation skill bundle at
+`<repo-root>/.claude/skills/noba-presentation/scripts/build_deck.py`
+and delegates rendering to it. That file is the single source of truth
+for python-pptx layouts (1:1 with `web/slides/*.jsx`).
 
-Step 2: import from `noba-core` submodule —
-    from noba_core.build_deck import main
-    main(spec.model_dump(), out_path)
-— which renders the full NOBA design. The in-memory spec format is
-already compatible (see noba-core/.claude/skills/noba-presentation/
-references/layout-map.md).
+The scripts directory is added to `sys.path` at import time so
+`build_deck.py` can resolve its sibling `tokens.py`.
 """
 from __future__ import annotations
 
 import io
-
-from pptx import Presentation
-from pptx.util import Inches, Pt
+import sys
+import tempfile
+from pathlib import Path
 
 from models.schemas import DeckSpec
 
 
+_HERE = Path(__file__).resolve().parent
+_SCRIPTS_DIR = (
+    _HERE.parent.parent / ".claude" / "skills" / "noba-presentation" / "scripts"
+)
+
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
+
+# Imported after sys.path adjustment so build_deck can find tokens.py.
+import build_deck  # noqa: E402
+
+
 def render(spec: DeckSpec) -> bytes:
-    prs = Presentation()
-    prs.slide_width = Inches(20)
-    prs.slide_height = Inches(11.25)
+    """Materialise the spec to .pptx bytes using the canonical builder."""
+    with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as tmp:
+        tmp_path = Path(tmp.name)
 
-    blank_layout = prs.slide_layouts[6]
-    for s in spec.slides:
-        slide = prs.slides.add_slide(blank_layout)
-        data = s.model_dump()
-        label = data.get("title") or data.get("headline") or data.get("layout", "slide")
-        tb = slide.shapes.add_textbox(Inches(1), Inches(4), Inches(18), Inches(3))
-        tf = tb.text_frame
-        p = tf.paragraphs[0]
-        r = p.add_run()
-        r.text = label
-        r.font.name = "Helvetica Neue"
-        r.font.size = Pt(54)
+    try:
+        build_deck.main(spec.model_dump(), tmp_path)
+        return tmp_path.read_bytes()
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
-    buf = io.BytesIO()
-    prs.save(buf)
-    return buf.getvalue()
+
+def render_to_io(spec: DeckSpec) -> io.BytesIO:
+    """Convenience for callers that want a file-like object."""
+    return io.BytesIO(render(spec))
