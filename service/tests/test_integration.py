@@ -77,9 +77,10 @@ def test_real_deck_from_brief():
     assert "cover" in layouts, f"Missing cover slide; got layouts {layouts}"
 
     # Downloaded .pptx opens
-    f = client.get(body["download_url"].split("://", 1)[1].split("/", 1)[1] if False else
-                   f"/v1/decks/{body['id']}/file",
-                   headers={"Authorization": "Bearer test-key"})
+    f = client.get(
+        f"/v1/decks/{body['id']}/file",
+        headers={"Authorization": "Bearer test-key"},
+    )
     assert f.status_code == 200
     assert f.content[:2] == b"PK"
     assert len(f.content) > 5_000, "pptx suspiciously small"
