@@ -7,16 +7,19 @@ trivial and robust.
 
 Environment:
 - `ANTHROPIC_API_KEY` (required in prod) — Anthropic Messages API key.
-- `NOBA_MODEL` (optional)               — model override. Default:
-                                          `claude-sonnet-4-6` (D7).
-                                          Set to `claude-opus-4-7` for
-                                          higher-stakes briefs where
-                                          voice precision matters more
-                                          than cost.
+- `NOBA_MODEL` (optional)               — deployment-level default
+                                          model override. When set,
+                                          beats `DEFAULT_MODEL` but
+                                          loses to per-request
+                                          `DeckRequest.model`.
 - `NOBA_STUB_CLAUDE=1` (optional)       — bypass the API, return a
                                           canned two-slide spec. Used
                                           by tests to avoid hitting
                                           the network.
+
+Per-request model selection (`DeckRequest.model`): accepts short
+aliases ('sonnet', 'opus', 'haiku') or a full model ID. Precedence:
+request > env > DEFAULT_MODEL.
 """
 from __future__ import annotations
 
@@ -29,6 +32,23 @@ from prompts.system_prompt import SYSTEM_PROMPT
 
 DEFAULT_MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 16_000
+
+MODEL_ALIASES = {
+    "sonnet": "claude-sonnet-4-6",
+    "opus":   "claude-opus-4-7",
+    "haiku":  "claude-haiku-4-5-20251001",
+}
+
+
+def _resolve_model(req: DeckRequest) -> str:
+    """Pick the Claude model for this request.
+
+    Precedence: request field → NOBA_MODEL env → DEFAULT_MODEL.
+    Aliases ('sonnet', 'opus', 'haiku') map to canonical IDs; any
+    other string is passed through as a full model ID.
+    """
+    candidate = req.model or os.environ.get("NOBA_MODEL") or DEFAULT_MODEL
+    return MODEL_ALIASES.get(candidate.lower(), candidate)
 
 
 EMIT_DECK_TOOL = {
@@ -152,7 +172,7 @@ def run(req: DeckRequest) -> tuple[str, DeckSpec]:
 
     client = Anthropic()
     resp = client.messages.create(
-        model=os.environ.get("NOBA_MODEL", DEFAULT_MODEL),
+        model=_resolve_model(req),
         max_tokens=MAX_TOKENS,
         system=[
             {

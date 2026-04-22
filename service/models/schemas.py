@@ -23,6 +23,16 @@ class DeckRequest(BaseModel):
                                      description="Optional overrides (accent_cover, methodology_phases, etc.).")
     requested_by: str | None = Field(None, max_length=200,
                                      description="Email or identity of the teammate issuing the request.")
+    model: str | None = Field(
+        None, max_length=100,
+        description=(
+            "Model alias or full model ID. Accepted aliases: 'sonnet' "
+            "(default, cost-optimised), 'opus' (voice-precision), "
+            "'haiku' (fastest). Full IDs like 'claude-opus-4-7' are "
+            "passed through unchanged. Omit to use the deployment's "
+            "default (NOBA_MODEL env, falling back to Sonnet 4.6)."
+        ),
+    )
 
 
 class SlideSpec(BaseModel):

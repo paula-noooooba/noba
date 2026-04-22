@@ -108,9 +108,22 @@ Request:
   "brief": "pasted client brief…",
   "mode": "text",
   "defaults": { "accent_cover": "pink", "methodology_phases": 4 },
-  "requested_by": "paula@noba.com"
+  "requested_by": "paula@noba.com",
+  "model": "sonnet"
 }
 ```
+
+`model` is optional. Accepted values:
+
+| Value | Resolves to |
+|---|---|
+| `"sonnet"` (default) | `claude-sonnet-4-6` — cost-optimised |
+| `"opus"`             | `claude-opus-4-7` — voice-precision for high-stakes briefs |
+| `"haiku"`            | `claude-haiku-4-5-20251001` — fastest |
+| full model ID        | passes through unchanged |
+
+Precedence: request field beats `NOBA_MODEL` env, which beats the
+built-in default.
 
 Response (text mode):
 ```json
