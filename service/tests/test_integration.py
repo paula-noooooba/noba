@@ -68,7 +68,13 @@ def test_real_deck_from_brief():
     # Shape checks
     assert body["id"].startswith("dck_")
     assert body["mode"] == "pptx"
-    assert body["outline"].startswith("## Slide 1")
+    # Outline contains per-slide headings. Claude may prepend an
+    # `## Assumptions` preamble (the system prompt invites it to) — so
+    # we don't require the outline to *start* with "## Slide 1", only
+    # to contain it.
+    assert "## Slide 1" in body["outline"], (
+        f"No '## Slide 1' heading in outline; got:\n{body['outline'][:500]}"
+    )
     assert body["slide_count"] >= 10, f"Got {body['slide_count']} slides; spine should be larger."
     assert body["download_url"]
 
