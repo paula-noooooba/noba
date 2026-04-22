@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NOBA — Snackin' For You (full-coverage template)</title>
+  <script type="module" src="../runtime/deck-stage.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1A1A1A; }
+    .slide { background: #FFFFFF; }
+    .shell { position: absolute; inset: 24px; border-radius: 24px; overflow: hidden; background: #FFF; }
+    .logo { position: absolute; top: 48px; right: 60px; font-weight: 700; font-size: 24px; letter-spacing: -0.01em; color: #1A1A1A; }
+    .logo.cover { top: 60px; right: 72px; }
+    .logo .tag { font-weight: 400; font-size: 11px; letter-spacing: 0.04em; opacity: 0.7; margin-top: 2px; }
+    .logo.inv { color: #FFFFFF; }
+    .logo.inv .tag { color: #FFFFFF; opacity: 0.7; }
+    .tag-pill { display:inline-block; padding:6px 14px; border:1px solid rgba(26,26,26,0.45);
+                border-radius:999px; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; }
+    .tag-pill.inv { border-color: rgba(255,255,255,0.5); color:#FFFFFF; }
+    .arrow { position: absolute; right: 60px; bottom: 48px; width: 80px; height: 24px; }
+    .tag-slot { position:absolute; top:60px; left:72px; }
+    .h-section { position:absolute; top:144px; left:72px; right:72px; margin:0; font-size:48px; font-weight:300; line-height:1.1; letter-spacing:-0.01em; }
+    .h-statement { margin:0; font-size:62px; font-weight:300; line-height:1.05; letter-spacing:-0.015em; }
+    .label { font-size:12px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.5; }
+  </style>
+</head>
+<body>
+<deck-stage>
+
+  <!-- 1. Title -->
+  <section class="slide">
+    <div class="shell">
+      <div class="logo cover">noba<div class="tag">a gellify company</div></div>
+      <div style="position:absolute; left:72px; top:360px; right:72px;">
+        <div class="label" style="margin-bottom:40px;">Commercial proposal</div>
+        <h1 style="margin:0; font-size:96px; font-weight:300; line-height:1.05; letter-spacing:-0.02em; color:#BE40BE;">
+          Snackin&rsquo; for you.
+        </h1>
+      </div>
+      <div style="position:absolute; left:72px; bottom:72px; font-size:13px;">
+        <div style="font-weight:700;">Snackin'</div>
+        <div style="opacity:0.6; margin-top:4px;">April 2026</div>
+      </div>
+      <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+    </div>
+  </section>
+
+  <!-- 2. Context -->
+  <section class="slide">
+    <div class="logo">noba<div class="tag">a gellify company</div></div>
+    <div class="tag-slot"><span class="tag-pill">Context</span></div>
+    <div style="position:absolute; top:192px; left:72px; width:1022px;">
+      <h2 class="h-statement">Healthy snacking is crowded. The shelf is louder than the product.</h2>
+      <p style="margin-top:40px; font-size:23px; line-height:1.4;">Three SKUs are ready. One needs to stand out — in the aisle and in the cart.</p>
+      <p style="margin-top:28px; font-size:17px; line-height:1.62; opacity:0.75;">We want to know which hero SKU earns repeat purchase and how to tell its story in under five seconds.</p>
+    </div>
+    <div style="position:absolute; top:60px; right:60px; bottom:60px; width:706px; border-radius:24px; background:#F0F0F0;"></div>
+    <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+  </section>
+
+  <!-- 3. Content — 3-card grid -->
+  <section class="slide">
+    <div class="logo">noba<div class="tag">a gellify company</div></div>
+    <div class="tag-slot"><span class="tag-pill">Approach</span></div>
+    <h2 class="h-section">Three moves that matter.</h2>
+    <div style="position:absolute; top:424px; left:72px; right:72px; bottom:140px; display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;">
+      <div style="background:#F0F0F0; border-radius:24px; padding:36px;">
+        <div class="label" style="margin-bottom:28px;">01</div>
+        <div style="font-size:23px; font-weight:700; line-height:1.25; margin-bottom:16px;">Read the shelf</div>
+        <div style="font-size:17px; line-height:1.62;">Observe real buyers in their natural habitat.</div>
+      </div>
+      <div style="background:#F0F0F0; border-radius:24px; padding:36px;">
+        <div class="label" style="margin-bottom:28px;">02</div>
+        <div style="font-size:23px; font-weight:700; line-height:1.25; margin-bottom:16px;">Put SKUs to the test</div>
+        <div style="font-size:17px; line-height:1.62;">Blind tastings, claims tests, preference scoring.</div>
+      </div>
+      <div style="background:#F0F0F0; border-radius:24px; padding:36px;">
+        <div class="label" style="margin-bottom:28px;">03</div>
+        <div style="font-size:23px; font-weight:700; line-height:1.25; margin-bottom:16px;">Sharpen the pitch</div>
+        <div style="font-size:17px; line-height:1.62;">A five-second story that earns the cart.</div>
+      </div>
+    </div>
+    <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+  </section>
+
+  <!-- 4. Objectives -->
+  <section class="slide">
+    <div class="logo">noba<div class="tag">a gellify company</div></div>
+    <div class="tag-slot"><span class="tag-pill">Objectives</span></div>
+    <h2 class="h-statement" style="position:absolute; top:208px; left:72px; width:820px; color:#E05820;">
+      Decide, fast, on the hero SKU.
+    </h2>
+    <div style="position:absolute; top:208px; right:72px; width:820px;">
+      <div style="padding:28px 0; border-top:1px solid #DCDCDC; border-bottom:1px solid #DCDCDC; display:grid; grid-template-columns:80px 1fr;">
+        <div class="label">01</div>
+        <div><div style="font-size:23px; font-weight:700;">Clarify demand</div><div style="margin-top:8px; font-size:17px; line-height:1.62;">Which SKU wins at first contact.</div></div>
+      </div>
+      <div style="padding:28px 0; border-bottom:1px solid #DCDCDC; display:grid; grid-template-columns:80px 1fr;">
+        <div class="label">02</div>
+        <div><div style="font-size:23px; font-weight:700;">Validate claims</div><div style="margin-top:8px; font-size:17px; line-height:1.62;">Which claims buyers actually believe and repeat.</div></div>
+      </div>
+      <div style="padding:28px 0; border-bottom:1px solid #DCDCDC; display:grid; grid-template-columns:80px 1fr;">
+        <div class="label">03</div>
+        <div><div style="font-size:23px; font-weight:700;">Shape the pitch</div><div style="margin-top:8px; font-size:17px; line-height:1.62;">The five-second story that converts.</div></div>
+      </div>
+    </div>
+    <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+  </section>
+
+  <!-- 5. Activities -->
+  <section class="slide">
+    <div class="logo">noba<div class="tag">a gellify company</div></div>
+    <div class="tag-slot"><span class="tag-pill">Activities</span></div>
+    <h2 class="h-section">Three tracks, one proof point.</h2>
+    <div style="position:absolute; top:360px; left:72px; right:72px; height:480px; display:grid; grid-template-columns:repeat(3, 1fr); gap:24px;">
+      <div style="background:#F0F0F0; border-radius:24px; padding:36px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:#E05820; margin-bottom:40px;"></div>
+        <div style="font-size:28px; font-weight:700; line-height:1.2; margin-bottom:20px;">Shelf ethnography</div>
+        <div style="font-size:17px; line-height:1.62;">Five stores, three cities, real buyers in real conditions.</div>
+      </div>
+      <div style="background:#F0F0F0; border-radius:24px; padding:36px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:#CBDC3A; margin-bottom:40px;"></div>
+        <div style="font-size:28px; font-weight:700; line-height:1.2; margin-bottom:20px;">Blind SKU tests</div>
+        <div style="font-size:17px; line-height:1.62;">Preference, repeat intent, and claim recall across 60 participants.</div>
+      </div>
+      <div style="background:#F0F0F0; border-radius:24px; padding:36px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:#BE40BE; margin-bottom:40px;"></div>
+        <div style="font-size:28px; font-weight:700; line-height:1.2; margin-bottom:20px;">Pitch workshop</div>
+        <div style="font-size:17px; line-height:1.62;">Co-create the five-second story with the buyers who just tried it.</div>
+      </div>
+    </div>
+    <div style="position:absolute; bottom:72px; left:72px; right:72px; padding-top:28px; border-top:1px solid #DCDCDC; display:flex; align-items:baseline; gap:40px;">
+      <div class="label" style="white-space:nowrap;">Deliverables</div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <span style="padding:6px 14px; border:1px solid rgba(26,26,26,0.45); border-radius:999px; font-size:13px;">Insight report</span>
+        <span style="padding:6px 14px; border:1px solid rgba(26,26,26,0.45); border-radius:999px; font-size:13px;">Workshop playback</span>
+        <span style="padding:6px 14px; border:1px solid rgba(26,26,26,0.45); border-radius:999px; font-size:13px;">Five-second pitch</span>
+      </div>
+    </div>
+    <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+  </section>
+
+  <!-- 6. Timeline -->
+  <section class="slide">
+    <div class="logo">noba<div class="tag">a gellify company</div></div>
+    <div class="tag-slot"><span class="tag-pill">Methodology</span></div>
+    <h2 class="h-section">A four-phase path to clarity.</h2>
+    <div style="position:absolute; top:560px; left:72px; right:72px; height:2px; background:#1A1A1A;"></div>
+    <div style="position:absolute; top:400px; left:72px; right:72px; display:grid; grid-template-columns:repeat(4, 1fr); gap:24px;">
+      <div style="position:relative; padding-bottom:200px;">
+        <div class="label" style="margin-bottom:12px;">01 · Wk 1–2</div>
+        <div style="font-size:28px; font-weight:700;">Sense</div>
+        <div style="position:absolute; top:170px; left:0; width:20px; height:20px; border-radius:50%; background:#1A1A1A;"></div>
+        <div style="position:absolute; top:220px; left:0; right:16px; font-size:15px; line-height:1.58;">Map the category and the current buyer story.</div>
+      </div>
+      <div style="position:relative; padding-bottom:200px;">
+        <div class="label" style="margin-bottom:12px;">02 · Wk 3–4</div>
+        <div style="font-size:28px; font-weight:700;">Shape</div>
+        <div style="position:absolute; top:170px; left:0; width:20px; height:20px; border-radius:50%; background:#1A1A1A;"></div>
+        <div style="position:absolute; top:220px; left:0; right:16px; font-size:15px; line-height:1.58;">Frame three hypotheses per SKU.</div>
+      </div>
+      <div style="position:relative; padding-bottom:200px;">
+        <div class="label" style="margin-bottom:12px;">03 · Wk 5–6</div>
+        <div style="font-size:28px; font-weight:700;">Stress</div>
+        <div style="position:absolute; top:170px; left:0; width:20px; height:20px; border-radius:50%; background:#1A1A1A;"></div>
+        <div style="position:absolute; top:220px; left:0; right:16px; font-size:15px; line-height:1.58;">Test with real buyers. Discard what doesn't hold.</div>
+      </div>
+      <div style="position:relative; padding-bottom:200px;">
+        <div class="label" style="margin-bottom:12px;">04 · Wk 7–8</div>
+        <div style="font-size:28px; font-weight:700;">Ship</div>
+        <div style="position:absolute; top:170px; left:0; width:20px; height:20px; border-radius:50%; background:#1A1A1A;"></div>
+        <div style="position:absolute; top:220px; left:0; right:16px; font-size:15px; line-height:1.58;">Package the hero SKU story, ready for rollout.</div>
+      </div>
+    </div>
+    <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+  </section>
+
+  <!-- 7. Framework -->
+  <section class="slide">
+    <div class="logo">noba<div class="tag">a gellify company</div></div>
+    <div class="tag-slot"><span class="tag-pill">Framework</span></div>
+    <h2 class="h-section">Four directions on the spectrum.</h2>
+    <div style="position:absolute; top:360px; left:72px; right:72px;">
+      <div style="display:flex; justify-content:space-between; font-size:12px; letter-spacing:0.08em; text-transform:uppercase; opacity:0.5; margin-bottom:12px;">
+        <span>Functional</span><span>Emotional</span>
+      </div>
+      <div style="height:2px; background:#1A1A1A;"></div>
+    </div>
+    <div style="position:absolute; top:448px; left:72px; right:72px; bottom:140px; display:grid; grid-template-columns:repeat(4, 1fr); gap:24px;">
+      <div style="background:#E05820; border-radius:24px; padding:28px;">
+        <div style="font-size:23px; font-weight:700; margin-bottom:20px;">Fuel</div>
+        <div style="font-size:15px; line-height:1.58;">The energy snack that keeps your day going.</div>
+      </div>
+      <div style="background:#D4D830; border-radius:24px; padding:28px;">
+        <div style="font-size:23px; font-weight:700; margin-bottom:20px;">Craft</div>
+        <div style="font-size:15px; line-height:1.58;">Made with care, read with pride.</div>
+      </div>
+      <div style="background:#9898B8; border-radius:24px; padding:28px;">
+        <div style="font-size:23px; font-weight:700; margin-bottom:20px;">Ritual</div>
+        <div style="font-size:15px; line-height:1.58;">The small, daily moment that's yours.</div>
+      </div>
+      <div style="background:#BE40BE; border-radius:24px; padding:28px;">
+        <div style="font-size:23px; font-weight:700; margin-bottom:20px; color:#FFFFFF;">Joy</div>
+        <div style="font-size:15px; line-height:1.58; color:#FFFFFF;">Unapologetic pleasure in a handful.</div>
+      </div>
+    </div>
+    <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+  </section>
+
+  <!-- 8. Stats -->
+  <section class="slide">
+    <div class="logo">noba<div class="tag">a gellify company</div></div>
+    <div class="tag-slot"><span class="tag-pill">Our expertise</span></div>
+    <h2 class="h-section">Four numbers, one story.</h2>
+    <div style="position:absolute; top:440px; left:50%; transform:translateX(-50%); display:flex;">
+      <div style="width:220px; height:220px; border-radius:50%; background:#E05820; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:4;">
+        <div style="font-size:56px; line-height:1;">120+</div>
+        <div style="margin-top:12px; font-size:13px; letter-spacing:0.06em; text-transform:uppercase;">Projects shipped</div>
+      </div>
+      <div style="width:220px; height:220px; border-radius:50%; background:#CBDC3A; margin-left:-32px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:3;">
+        <div style="font-size:56px; line-height:1;">20</div>
+        <div style="margin-top:12px; font-size:13px; letter-spacing:0.06em; text-transform:uppercase;">Countries</div>
+      </div>
+      <div style="width:220px; height:220px; border-radius:50%; background:#BE40BE; margin-left:-32px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:2; color:#FFFFFF;">
+        <div style="font-size:56px; line-height:1;">40+</div>
+        <div style="margin-top:12px; font-size:13px; letter-spacing:0.06em; text-transform:uppercase;">Active brands</div>
+      </div>
+      <div style="width:220px; height:220px; border-radius:50%; background:#4A7FC8; margin-left:-32px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; z-index:1; color:#FFFFFF;">
+        <div style="font-size:56px; line-height:1;">10y</div>
+        <div style="margin-top:12px; font-size:13px; letter-spacing:0.06em; text-transform:uppercase;">Track record</div>
+      </div>
+    </div>
+    <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#1A1A1A" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#1A1A1A" stroke-width="1.5" fill="none"/></svg>
+  </section>
+
+  <!-- 9. Dark outro -->
+  <section class="slide">
+    <div class="shell" style="background:#393939;">
+      <div class="logo inv">noba<div class="tag">a gellify company</div></div>
+      <div style="position:absolute; top:52px; left:72px; right:72px; bottom:120px; color:#FFFFFF; display:flex; flex-direction:column; justify-content:center;">
+        <div class="label" style="opacity:0.7; margin-bottom:40px; color:#FFFFFF;">The NOBA way</div>
+        <h2 style="margin:0; font-size:80px; font-weight:300; line-height:1.05; letter-spacing:-0.015em; max-width:1400px;">
+          Move decisively. Test early. Ship the story.
+        </h2>
+      </div>
+      <svg class="arrow" viewBox="0 0 80 24" fill="none"><line x1="0" y1="12" x2="74" y2="12" stroke="#FFFFFF" stroke-width="1.5"/><polyline points="66,4 74,12 66,20" stroke="#FFFFFF" stroke-width="1.5" fill="none"/></svg>
+    </div>
+  </section>
+
+</deck-stage>
+</body>
+</html>
