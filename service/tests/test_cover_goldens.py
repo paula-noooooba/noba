@@ -111,12 +111,23 @@ def test_title_is_ink_not_accent(cover_pptx):
     pytest.fail("Could not find the title run to check colour.")
 
 
-def test_logo_has_N_and_BA(cover_pptx):
-    """The wordmark is rendered as two text shapes ('N' and 'BA') plus
-    a rounded rectangle pill. Verify at least the two text halves."""
-    text = _all_text(cover_pptx)
-    # Avoid matching the title "Next-Generation" — check isolated tokens.
-    assert " N " in f" {text} " or text.startswith("N ") or text == "N" or " N" in text.split()
-    # Look for the "BA" pair surrounded by whitespace or at boundaries.
-    tokens = text.split()
-    assert "BA" in tokens, f"Expected standalone 'BA' token, got tokens: {tokens}"
+def test_logo_is_present(cover_pptx):
+    """Logo is either the real brand PNG (a Picture shape) or, when the
+    asset is missing, a shape-drawn fallback with 'N' and 'BA' text.
+    One of the two modes must be present — the slide is never logo-less.
+    """
+    from pptx.enum.shapes import MSO_SHAPE_TYPE
+
+    for slide in cover_pptx.slides:
+        # Mode 1: real brand PNG was embedded.
+        for shape in slide.shapes:
+            if shape.shape_type == MSO_SHAPE_TYPE.PICTURE:
+                return  # Logo is a picture — done.
+
+        # Mode 2: shape fallback — expect isolated 'N' and 'BA' tokens.
+        tokens = _all_text(cover_pptx).split()
+        assert "N" in tokens, f"Expected standalone 'N' token, got tokens: {tokens}"
+        assert "BA" in tokens, f"Expected standalone 'BA' token, got tokens: {tokens}"
+        return
+
+    pytest.fail("No slides in presentation.")

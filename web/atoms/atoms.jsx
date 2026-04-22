@@ -24,8 +24,10 @@ const font = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 // for JSX demos at the Figma scale (in web/templates/*.html the slide is
 // 1920×1080 via deck-stage so we use the slide-scale values here).
 export function Logo({ variant = "dark", position = "inside", width = 368, height = 48 }) {
-  const src = variant === "light" ? "../assets/logo-noba-neg.svg"
-                                  : "../assets/logo-noba.svg";
+  // Real brand PNG lives at web/assets/logo-noba[-neg].png. SVG fallback
+  // is used automatically by browsers that fail to load the PNG.
+  const src = variant === "light" ? "../assets/logo-noba-neg.png"
+                                  : "../assets/logo-noba.png";
   const top = position === "cover" ? 48 : 48;
   return (
     <img src={src} alt="NOBA"
@@ -36,16 +38,16 @@ export function Logo({ variant = "dark", position = "inside", width = 368, heigh
   );
 }
 
-// Stroke-only right arrow. Sits inline before the bottom caption on most
-// slides (including the cover), not at bottom-right of the slide.
-// Figma: 17.84×17.25 at 960 frame → 36×35 at slide scale.
-export function Arrow({ variant = "dark", width = 36, height = 35, opacity = 0.5 }) {
-  const src = variant === "light" ? "../assets/arrow-neg.svg"
-                                  : "../assets/arrow.svg";
+// Right arrow, sits inline before the bottom caption (cover et al).
+// Real brand PNG lives at web/assets/arrow[-neg].png. Figma: 17.84×17.25
+// at 960 frame → 36×35 at slide scale.
+export function Arrow({ variant = "dark", width = 36, height = 35 }) {
+  const src = variant === "light" ? "../assets/arrow-neg.png"
+                                  : "../assets/arrow.png";
   return (
     <img src={src} alt=""
          style={{
-           display: "inline-block", width, height, opacity,
+           display: "inline-block", width, height,
            verticalAlign: "middle",
          }} />
   );

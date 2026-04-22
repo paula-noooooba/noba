@@ -14,6 +14,7 @@ Usage:
 """
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 from pptx import Presentation
@@ -25,19 +26,57 @@ from pptx.util import Emu, Pt
 from tokens import C, S, T, SLIDE, px_to_emu
 
 
+# --------------------------------------------------------------- brand assets
+# Real brand assets (PNG) live at <repo-root>/web/assets/. When present,
+# add_logo / add_inline_arrow use them via add_picture. When missing,
+# they fall back to shape-drawn placeholders (so CI and first-run dev
+# still work). Drop the real images at the paths below to upgrade.
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+_ASSETS = REPO_ROOT / "web" / "assets"
+
+LOGO_DARK_FILE  = _ASSETS / "logo-noba.png"       # dark logo on paper backgrounds
+LOGO_LIGHT_FILE = _ASSETS / "logo-noba-neg.png"   # light logo on dark backgrounds
+ARROW_DARK_FILE = _ASSETS / "arrow.png"
+ARROW_LIGHT_FILE = _ASSETS / "arrow-neg.png"
+
+_expected_assets = [LOGO_DARK_FILE, LOGO_LIGHT_FILE, ARROW_DARK_FILE, ARROW_LIGHT_FILE]
+_missing_assets = [p for p in _expected_assets if not p.exists()]
+if _missing_assets:
+    print(
+        "[noba.build_deck] Falling back to shape-drawn placeholders for "
+        f"{len(_missing_assets)} brand asset(s). Drop the real images at:\n  "
+        + "\n  ".join(str(p) for p in _missing_assets),
+        file=sys.stderr,
+    )
+
+
+# -------------------------------------------------------------------- fonts
+# python-pptx has no numeric font-weight attribute; PowerPoint selects
+# the typeface by font-face name. To get Helvetica Neue Light (weight
+# 300) on macOS / Windows with the full family installed, set the font
+# name explicitly to "Helvetica Neue Light".
+
+FONT_REGULAR = T.family                   # "Helvetica Neue"  (weight 400)
+FONT_LIGHT   = f"{T.family} Light"        # "Helvetica Neue Light" (weight 300)
+FONT_BOLD    = T.family                   # bold achieved via font.bold = True
+
+
 # --------------------------------------------------------------------- atoms
 # Match web/atoms/atoms.jsx 1:1. Each atom is a thin helper; slide builders
 # compose them. Atoms know nothing about slide content — only visuals.
 
 def add_logo(slide, variant: str = "dark", position: str = "inside"):
-    """NOBA wordmark — N + pill + BA, rendered as shapes.
+    """NOBA wordmark.
 
-    Matches web/assets/logo-noba.svg (Figma node 3:11 from
-    qqNtw4M8gc3zYRHwKJae7W). 368×48 px at slide scale; top-right
-    pinned to a 48-px padding on both sides for `cover`, 48×60 for
-    `inside` slides (until individual layouts say otherwise).
+    Prefers the real brand PNG at `web/assets/logo-noba[-neg].png`
+    (dark for paper backgrounds, neg for dark backgrounds). Falls back
+    to a shape-drawn stand-in when the asset is missing — Paula has
+    flagged the stand-in as "not the logo" so the real PNG is required
+    for brand-accurate output. Figma source: node 3:11 of
+    qqNtw4M8gc3zYRHwKJae7W. 368×48 px at slide scale; top-right with
+    a 48-px padding on both sides for `cover`, 60/48 for `inside`.
     """
-    color = C.neutral_paper if variant == "light" else C.neutral_ink
     w = S.cover_logo_width
     h = S.cover_logo_height
     pad_right = S.slide_pad_cover if position == "cover" else px_to_emu(60)
@@ -45,35 +84,36 @@ def add_logo(slide, variant: str = "dark", position: str = "inside"):
     left = SLIDE.width - pad_right - w
     top = pad_top
 
-    # "N"
+    asset = LOGO_LIGHT_FILE if variant == "light" else LOGO_DARK_FILE
+    if asset.exists():
+        slide.shapes.add_picture(str(asset), left, top, width=w, height=h)
+        return
+
+    color = C.neutral_paper if variant == "light" else C.neutral_ink
+    _draw_logo_fallback(slide, left, top, w, h, color)
+
+
+def _draw_logo_fallback(slide, left, top, w, h, color: RGBColor):
+    """Stand-in used only when the real PNG is missing."""
     n_width = px_to_emu(44)
     _add_text(
         slide, left, top, n_width, h, "N",
-        size_pt=36,  # 48px at slide scale = 36pt at 96 DPI; Helvetica Neue Regular
-        weight=400, color=color,
+        size_pt=36, weight=400, color=color,
         leading=1.0, anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.LEFT,
     )
-
-    # Pill (stroke-only rounded rectangle, fully rounded)
-    pill_x = left + px_to_emu(44)
-    pill_y = top + px_to_emu(8)
-    pill_w = px_to_emu(240)
-    pill_h = px_to_emu(32)
     pill = slide.shapes.add_shape(
-        MSO_SHAPE.ROUNDED_RECTANGLE, pill_x, pill_y, pill_w, pill_h
+        MSO_SHAPE.ROUNDED_RECTANGLE,
+        left + px_to_emu(44), top + px_to_emu(8),
+        px_to_emu(240), px_to_emu(32),
     )
-    pill.adjustments[0] = 0.5  # fully rounded
+    pill.adjustments[0] = 0.5
     pill.fill.background()
     pill.line.color.rgb = color
     pill.line.width = Emu(px_to_emu(1.5))
-
-    # "BA"
     ba_width = px_to_emu(84)
-    ba_left = left + w - ba_width
     _add_text(
-        slide, ba_left, top, ba_width, h, "BA",
-        size_pt=T.cover_title()["size_px"] * 0.25,
-        weight=400, color=color,
+        slide, left + w - ba_width, top, ba_width, h, "BA",
+        size_pt=36, weight=400, color=color,
         leading=1.0, anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.RIGHT,
     )
 
@@ -98,47 +138,40 @@ def add_arrow(slide, variant: str = "dark"):
 
 
 def add_inline_arrow(slide, left, top, variant: str = "dark",
-                     width_px: int = 36, height_px: int = 35, opacity: float = 0.5):
+                     width_px: int = 36, height_px: int = 35):
     """Small right-pointing arrow at a specified (left, top).
 
-    Matches web/assets/arrow.svg (Figma node 4:18). Used inline before
-    bottom captions — the cover is the first adopter. Opacity baked in
-    by darkening the stroke toward the background rather than using
-    python-pptx transparency (which is fiddly).
+    Prefers the real brand PNG at `web/assets/arrow[-neg].png`. Falls
+    back to a connector-drawn stand-in when the asset is missing.
+    Figma source: node 4:18 of qqNtw4M8gc3zYRHwKJae7W. Used inline
+    before bottom captions — the cover is the first adopter.
     """
-    fg = C.neutral_paper if variant == "light" else C.neutral_ink
-    bg = C.neutral_dark if variant == "light" else C.neutral_paper
-    # Pre-composite the 50% grey appearance.
-    r = int(opacity * fg[0] + (1 - opacity) * bg[0])
-    g = int(opacity * fg[1] + (1 - opacity) * bg[1])
-    b = int(opacity * fg[2] + (1 - opacity) * bg[2])
-    stroke = RGBColor(r, g, b)
-
     w = px_to_emu(width_px)
     h = px_to_emu(height_px)
+
+    asset = ARROW_LIGHT_FILE if variant == "light" else ARROW_DARK_FILE
+    if asset.exists():
+        slide.shapes.add_picture(str(asset), left, top, width=w, height=h)
+        return
+
+    _draw_arrow_fallback(slide, left, top, w, h, variant)
+
+
+def _draw_arrow_fallback(slide, left, top, w, h, variant: str):
+    """Stand-in: line + two chevron strokes. Matches arrow geometry
+    close enough for development when the real PNG is missing."""
+    fg = C.neutral_paper if variant == "light" else C.neutral_ink
     mid_y = top + h // 2
-
-    # Horizontal shaft
     shaft_end = left + w - px_to_emu(6)
-    shaft = slide.shapes.add_connector(1, left, mid_y, shaft_end, mid_y)
-    shaft.line.color.rgb = stroke
-    shaft.line.width = Emu(px_to_emu(1))
 
-    # Upper chevron stroke
-    upper = slide.shapes.add_connector(
-        1, shaft_end - px_to_emu(8), mid_y - px_to_emu(7),
-        shaft_end, mid_y,
-    )
-    upper.line.color.rgb = stroke
-    upper.line.width = Emu(px_to_emu(1))
-
-    # Lower chevron stroke
-    lower = slide.shapes.add_connector(
-        1, shaft_end, mid_y,
-        shaft_end - px_to_emu(8), mid_y + px_to_emu(7),
-    )
-    lower.line.color.rgb = stroke
-    lower.line.width = Emu(px_to_emu(1))
+    for start, end in [
+        ((left, mid_y),                              (shaft_end, mid_y)),
+        ((shaft_end - px_to_emu(8), mid_y - px_to_emu(7)), (shaft_end, mid_y)),
+        ((shaft_end, mid_y),                         (shaft_end - px_to_emu(8), mid_y + px_to_emu(7))),
+    ]:
+        conn = slide.shapes.add_connector(1, start[0], start[1], end[0], end[1])
+        conn.line.color.rgb = fg
+        conn.line.width = Emu(px_to_emu(1))
 
 
 def add_tag(slide, text: str, left, top, tone: str = "ink"):
@@ -198,6 +231,13 @@ def add_dot(slide, x, y, color, size: str = "md"):
 
 # ---------------------------------------------------------------- text helpers
 
+def _font_for_weight(weight: int) -> str:
+    """Pick the Helvetica Neue face for a given numeric weight."""
+    if weight <= 300:
+        return FONT_LIGHT
+    return FONT_REGULAR  # Bold is applied via font.bold = True, same family.
+
+
 def _add_text(slide, left, top, width, height, text: str, *,
               size_pt: float, weight: int = 400, color=None,
               leading: float = 1.2, tracking: float = 0,
@@ -215,7 +255,7 @@ def _add_text(slide, left, top, width, height, text: str, *,
     p.line_spacing = leading
     r = p.add_run()
     r.text = text.upper() if uppercase else text
-    r.font.name = T.family
+    r.font.name = _font_for_weight(weight)
     r.font.size = Pt(size_pt)
     r.font.bold = weight >= 700
     r.font.color.rgb = color
@@ -242,7 +282,10 @@ def build_cover(prs, spec):
 
     Spec fields:
         title    (str, required) — huge ink headline, Light 300, 140px.
-        subtitle (str)           — 36px Light ink line below the title.
+        subtitle (str)           — 36px Light ink line below the title,
+                                   separated by a fixed 20px (10px
+                                   Figma) gap regardless of how the
+                                   title wraps.
         client   (str)           — rendered in the bottom caption.
         date     (str)           — rendered in the bottom caption.
 
@@ -253,39 +296,48 @@ def build_cover(prs, spec):
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_logo(slide, variant="dark", position="cover")
 
-    # Title + subtitle column
+    # Title + subtitle as a single stacked textbox. Using two
+    # paragraphs in one text frame (rather than two separate textboxes)
+    # keeps the gap fixed at 20px regardless of how many lines the title
+    # wraps to. The space_before on the subtitle paragraph gives us that
+    # gap: 20px at slide scale = 15pt at 96 DPI.
     title_scale = T.cover_title()
-    _add_text(
-        slide,
-        S.slide_pad_cover, S.cover_title_y,
-        S.cover_title_width, px_to_emu(280),
-        spec["title"],
-        size_pt=title_scale["size_px"] * 0.75,
-        weight=title_scale["weight"],
-        leading=title_scale["leading"],
-        color=C.neutral_ink,
-    )
+    sub_scale   = T.cover_sub()
 
-    sub_scale = T.cover_sub()
-    _add_text(
-        slide,
-        S.slide_pad_cover,
-        S.cover_title_y + px_to_emu(300),
-        S.cover_title_width, px_to_emu(60),
-        spec.get("subtitle", ""),
-        size_pt=sub_scale["size_px"] * 0.75,
-        weight=sub_scale["weight"],
-        leading=sub_scale["leading"],
-        color=C.neutral_ink,
+    box = slide.shapes.add_textbox(
+        S.slide_pad_cover, S.cover_title_y,
+        S.cover_title_width, SLIDE.height - S.cover_title_y - px_to_emu(200),
     )
+    tf = box.text_frame
+    tf.margin_top = tf.margin_bottom = tf.margin_left = tf.margin_right = 0
+    tf.word_wrap = True
+
+    p_title = tf.paragraphs[0]
+    p_title.line_spacing = title_scale["leading"]
+    r_title = p_title.add_run()
+    r_title.text = spec["title"]
+    r_title.font.name  = _font_for_weight(title_scale["weight"])
+    r_title.font.size  = Pt(title_scale["size_px"] * 0.75)
+    r_title.font.color.rgb = C.neutral_ink
+
+    subtitle = spec.get("subtitle", "").strip()
+    if subtitle:
+        p_sub = tf.add_paragraph()
+        p_sub.line_spacing = sub_scale["leading"]
+        # 20px slide scale = 15pt. Figma authors see this as "10px gap".
+        p_sub.space_before = Pt(15)
+        r_sub = p_sub.add_run()
+        r_sub.text = subtitle
+        r_sub.font.name  = _font_for_weight(sub_scale["weight"])
+        r_sub.font.size  = Pt(sub_scale["size_px"] * 0.75)
+        r_sub.font.color.rgb = C.neutral_ink
 
     # Bottom caption row: inline arrow + "Prepared for X | date"
     caption_top = SLIDE.height - S.slide_pad_cover - px_to_emu(35)
     add_inline_arrow(slide, S.slide_pad_cover, caption_top, variant="dark")
 
     cap_scale = T.cover_cap()
-    # 50% black — pre-composite on paper in the RGB.
-    grey = RGBColor(0x80, 0x80, 0x80)
+    grey = RGBColor(0x80, 0x80, 0x80)  # 50% black on paper
     caption_text_left = S.slide_pad_cover + px_to_emu(36) + S.cover_arrow_gap
     _add_text(
         slide,
