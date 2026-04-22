@@ -63,6 +63,15 @@ web/                             Visual reference — JSX + HTML demos
   scripts/
     tokens.py                    Loads tokens.json → C, S, T, SLIDE
     build_deck.py                python-pptx builders (1:1 with JSX)
+service/                         Phase 2 — deck-generation API (see service/README.md)
+  app.py                         FastAPI app
+  modal_app.py                   Modal deployment entrypoint
+  routes/                        /healthz, /version, /v1/decks
+  services/                      claude_runner, deck_builder, storage
+  models/schemas.py              DeckRequest / DeckResponse / DeckSpec
+  tests/                         End-to-end smoke tests
 ```
 
-Full refinement plan: `~/.claude/plans/hey-claude-i-want-polymorphic-church.md`.
+Plans:
+- Phase 1 (this repo's skill): `~/.claude/plans/hey-claude-i-want-polymorphic-church.md`
+- Phase 2 (the service): `~/.claude/plans/noba-deck-service.md`
