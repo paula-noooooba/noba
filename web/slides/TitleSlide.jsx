@@ -1,52 +1,68 @@
 // TitleSlide — cover slide.
-// Anatomy: paper shell, hero headline in accent color, Logo top-right (cover),
-// client/date caption bottom-left, Arrow bottom-right.
+//
+// Figma source of truth: qqNtw4M8gc3zYRHwKJae7W, node 3:5
+// https://www.figma.com/design/qqNtw4M8gc3zYRHwKJae7W/NOBA-PPT-Design-System?node-id=3-5
+//
+// Anatomy:
+// - Full-bleed white background, 48px padding on all sides (24px at
+//   Figma 960×540 scale → 48px at our 1920×1080 slide scale).
+// - Logo atom pinned top-right (368×48 image, the N[capsule]BA wordmark).
+// - Left-aligned title group: 140px title (ink), 36px subtitle (ink,
+//   Light). Title box is 1094px wide so long titles wrap at the same
+//   point regardless of content.
+// - Bottom-left caption row: the arrow glyph inline, then a single
+//   "Prepared for <client> | <date>" line at 24px, 50% black.
+//
+// No shell, no accent colour on the title, no eyebrow — those belong
+// to earlier iterations and are intentionally removed.
 
 import React from "react";
-import { Logo, Arrow, Shell } from "../atoms/atoms.jsx";
+import { Logo, Arrow } from "../atoms/atoms.jsx";
 
 const font = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 export default function TitleSlide({
-  eyebrow = "Commercial proposal",
-  title = "Next-gen innovation",
-  accent = "#BE40BE",
-  client = "Client name",
-  date = "April 2026",
+  title = "Next-Generation Coffee Innovation",
+  subtitle = "Identifying and testing new growth opportunities",
+  client = "lavazza",
+  date = "september 2025",
 }) {
   return (
-    <section className="slide">
-      <Shell>
-        <Logo variant="dark" position="cover" />
+    <section className="slide" style={{
+      background: "#FFFFFF", position: "relative",
+      width: 1920, height: 1080,
+      padding: 48, boxSizing: "border-box",
+    }}>
+      <Logo variant="dark" position="cover" />
 
-        <div style={{
-          position: "absolute", left: 72, top: 360, right: 72,
-          fontFamily: font,
+      <div style={{
+        position: "absolute", left: 48, top: 322, width: 1094,
+        display: "flex", flexDirection: "column", gap: 20,
+      }}>
+        <h1 style={{
+          margin: 0,
+          fontFamily: font, fontWeight: 300, fontSize: 140,
+          lineHeight: 1, letterSpacing: "-0.3px", color: "#1A1A1A",
         }}>
-          <div style={{
-            fontSize: 12, fontWeight: 400, letterSpacing: "0.08em",
-            textTransform: "uppercase", color: "#1A1A1A", marginBottom: 40,
-          }}>
-            {eyebrow}
-          </div>
-          <h1 style={{
-            margin: 0, fontSize: 96, fontWeight: 300,
-            lineHeight: 1.05, letterSpacing: "-0.02em", color: accent,
-          }}>
-            {title}
-          </h1>
-        </div>
-
+          {title}
+        </h1>
         <div style={{
-          position: "absolute", left: 72, bottom: 72,
-          fontFamily: font, fontSize: 13, color: "#1A1A1A",
+          fontFamily: font, fontWeight: 300, fontSize: 36,
+          lineHeight: 1.2, color: "#1A1A1A",
         }}>
-          <div style={{ fontWeight: 700 }}>{client}</div>
-          <div style={{ opacity: 0.6, marginTop: 4 }}>{date}</div>
+          {subtitle}
         </div>
+      </div>
 
+      <div style={{
+        position: "absolute", left: 48, bottom: 48,
+        display: "flex", alignItems: "center", gap: 20,
+        fontFamily: font, fontWeight: 400, fontSize: 24,
+        color: "rgba(0,0,0,0.5)",
+      }}>
         <Arrow variant="dark" />
-      </Shell>
+        <span>Prepared for {client} | {date}</span>
+      </div>
     </section>
   );
 }

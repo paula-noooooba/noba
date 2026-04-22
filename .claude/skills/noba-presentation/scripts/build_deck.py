@@ -30,32 +30,60 @@ from tokens import C, S, T, SLIDE, px_to_emu
 # compose them. Atoms know nothing about slide content — only visuals.
 
 def add_logo(slide, variant: str = "dark", position: str = "inside"):
-    """Logo atom. Text placeholder until real art lands in web/assets/."""
+    """NOBA wordmark — N + pill + BA, rendered as shapes.
+
+    Matches web/assets/logo-noba.svg (Figma node 3:11 from
+    qqNtw4M8gc3zYRHwKJae7W). 368×48 px at slide scale; top-right
+    pinned to a 48-px padding on both sides for `cover`, 48×60 for
+    `inside` slides (until individual layouts say otherwise).
+    """
     color = C.neutral_paper if variant == "light" else C.neutral_ink
-    left = SLIDE.width - px_to_emu(72 if position == "cover" else 60) - px_to_emu(140)
-    top = px_to_emu(60 if position == "cover" else 48)
-    box = slide.shapes.add_textbox(left, top, px_to_emu(140), px_to_emu(40))
-    tf = box.text_frame
-    tf.margin_top = tf.margin_bottom = tf.margin_left = tf.margin_right = 0
-    p = tf.paragraphs[0]
-    p.alignment = PP_ALIGN.RIGHT
-    r = p.add_run()
-    r.text = "noba"
-    r.font.name = T.family
-    r.font.size = Pt(18)
-    r.font.bold = True
-    r.font.color.rgb = color
-    p2 = tf.add_paragraph()
-    p2.alignment = PP_ALIGN.RIGHT
-    r2 = p2.add_run()
-    r2.text = "a gellify company"
-    r2.font.name = T.family
-    r2.font.size = Pt(8)
-    r2.font.color.rgb = color
+    w = S.cover_logo_width
+    h = S.cover_logo_height
+    pad_right = S.slide_pad_cover if position == "cover" else px_to_emu(60)
+    pad_top   = S.slide_pad_cover if position == "cover" else px_to_emu(48)
+    left = SLIDE.width - pad_right - w
+    top = pad_top
+
+    # "N"
+    n_width = px_to_emu(44)
+    _add_text(
+        slide, left, top, n_width, h, "N",
+        size_pt=36,  # 48px at slide scale = 36pt at 96 DPI; Helvetica Neue Regular
+        weight=400, color=color,
+        leading=1.0, anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.LEFT,
+    )
+
+    # Pill (stroke-only rounded rectangle, fully rounded)
+    pill_x = left + px_to_emu(44)
+    pill_y = top + px_to_emu(8)
+    pill_w = px_to_emu(240)
+    pill_h = px_to_emu(32)
+    pill = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, pill_x, pill_y, pill_w, pill_h
+    )
+    pill.adjustments[0] = 0.5  # fully rounded
+    pill.fill.background()
+    pill.line.color.rgb = color
+    pill.line.width = Emu(px_to_emu(1.5))
+
+    # "BA"
+    ba_width = px_to_emu(84)
+    ba_left = left + w - ba_width
+    _add_text(
+        slide, ba_left, top, ba_width, h, "BA",
+        size_pt=T.cover_title()["size_px"] * 0.25,
+        weight=400, color=color,
+        leading=1.0, anchor=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.RIGHT,
+    )
 
 
 def add_arrow(slide, variant: str = "dark"):
-    """Arrow atom — bottom-right."""
+    """Bottom-right arrow. Legacy — used by non-cover slides until they
+    migrate to the inline-arrow design from Figma. For slides where the
+    arrow sits inline before a bottom caption (cover, etc.), use
+    `add_inline_arrow` at the caption's (x, y) instead.
+    """
     color = C.neutral_paper if variant == "light" else C.neutral_ink
     width, height = px_to_emu(80), px_to_emu(24)
     left = SLIDE.width - px_to_emu(60) - width
@@ -63,11 +91,54 @@ def add_arrow(slide, variant: str = "dark"):
     line = slide.shapes.add_connector(1, left, top + height // 2, left + width - px_to_emu(6), top + height // 2)
     line.line.color.rgb = color
     line.line.width = Emu(px_to_emu(1.5))
-    # Arrow head (approximation — triangle)
     head = slide.shapes.add_shape(MSO_SHAPE.RIGHT_TRIANGLE, left + width - px_to_emu(14), top, px_to_emu(14), height)
     head.fill.solid()
     head.fill.fore_color.rgb = color
     head.line.fill.background()
+
+
+def add_inline_arrow(slide, left, top, variant: str = "dark",
+                     width_px: int = 36, height_px: int = 35, opacity: float = 0.5):
+    """Small right-pointing arrow at a specified (left, top).
+
+    Matches web/assets/arrow.svg (Figma node 4:18). Used inline before
+    bottom captions — the cover is the first adopter. Opacity baked in
+    by darkening the stroke toward the background rather than using
+    python-pptx transparency (which is fiddly).
+    """
+    fg = C.neutral_paper if variant == "light" else C.neutral_ink
+    bg = C.neutral_dark if variant == "light" else C.neutral_paper
+    # Pre-composite the 50% grey appearance.
+    r = int(opacity * fg[0] + (1 - opacity) * bg[0])
+    g = int(opacity * fg[1] + (1 - opacity) * bg[1])
+    b = int(opacity * fg[2] + (1 - opacity) * bg[2])
+    stroke = RGBColor(r, g, b)
+
+    w = px_to_emu(width_px)
+    h = px_to_emu(height_px)
+    mid_y = top + h // 2
+
+    # Horizontal shaft
+    shaft_end = left + w - px_to_emu(6)
+    shaft = slide.shapes.add_connector(1, left, mid_y, shaft_end, mid_y)
+    shaft.line.color.rgb = stroke
+    shaft.line.width = Emu(px_to_emu(1))
+
+    # Upper chevron stroke
+    upper = slide.shapes.add_connector(
+        1, shaft_end - px_to_emu(8), mid_y - px_to_emu(7),
+        shaft_end, mid_y,
+    )
+    upper.line.color.rgb = stroke
+    upper.line.width = Emu(px_to_emu(1))
+
+    # Lower chevron stroke
+    lower = slide.shapes.add_connector(
+        1, shaft_end, mid_y,
+        shaft_end - px_to_emu(8), mid_y + px_to_emu(7),
+    )
+    lower.line.color.rgb = stroke
+    lower.line.width = Emu(px_to_emu(1))
 
 
 def add_tag(slide, text: str, left, top, tone: str = "ink"):
@@ -165,35 +236,68 @@ def _accent(name: str) -> RGBColor:
 # adding (or updating) the JSX reference and design/tokens.json.
 
 def build_cover(prs, spec):
-    """← web/slides/TitleSlide.jsx"""
+    """← web/slides/TitleSlide.jsx
+
+    Figma source: qqNtw4M8gc3zYRHwKJae7W, node 3:5.
+
+    Spec fields:
+        title    (str, required) — huge ink headline, Light 300, 140px.
+        subtitle (str)           — 36px Light ink line below the title.
+        client   (str)           — rendered in the bottom caption.
+        date     (str)           — rendered in the bottom caption.
+
+    Fields NOT used (removed from earlier iterations):
+        eyebrow  — not part of the Figma design; ignore if present.
+        accent   — title is ink (#1A1A1A), no accent colour.
+    """
     slide = prs.slides.add_slide(prs.slide_layouts[6])
-    add_shell(slide)
     add_logo(slide, variant="dark", position="cover")
 
+    # Title + subtitle column
+    title_scale = T.cover_title()
     _add_text(
-        slide, px_to_emu(72), px_to_emu(320), SLIDE.width - px_to_emu(144), px_to_emu(30),
-        spec.get("eyebrow", "Commercial proposal"),
-        size_pt=T.label()["size_px"] * 0.75, color=C.neutral_ink,
-        tracking=0.08, uppercase=True,
-    )
-    _add_text(
-        slide, px_to_emu(72), px_to_emu(360), SLIDE.width - px_to_emu(144), px_to_emu(360),
+        slide,
+        S.slide_pad_cover, S.cover_title_y,
+        S.cover_title_width, px_to_emu(280),
         spec["title"],
-        size_pt=T.hero()["size_px"] * 0.75,
-        weight=300, leading=1.05,
-        color=_accent(spec.get("accent", "pink")),
+        size_pt=title_scale["size_px"] * 0.75,
+        weight=title_scale["weight"],
+        leading=title_scale["leading"],
+        color=C.neutral_ink,
     )
 
+    sub_scale = T.cover_sub()
     _add_text(
-        slide, px_to_emu(72), SLIDE.height - px_to_emu(132), px_to_emu(600), px_to_emu(24),
-        spec.get("client", ""), size_pt=10, weight=700, color=C.neutral_ink,
-    )
-    _add_text(
-        slide, px_to_emu(72), SLIDE.height - px_to_emu(106), px_to_emu(600), px_to_emu(20),
-        spec.get("date", ""), size_pt=10, color=C.neutral_ink,
+        slide,
+        S.slide_pad_cover,
+        S.cover_title_y + px_to_emu(300),
+        S.cover_title_width, px_to_emu(60),
+        spec.get("subtitle", ""),
+        size_pt=sub_scale["size_px"] * 0.75,
+        weight=sub_scale["weight"],
+        leading=sub_scale["leading"],
+        color=C.neutral_ink,
     )
 
-    add_arrow(slide, variant="dark")
+    # Bottom caption row: inline arrow + "Prepared for X | date"
+    caption_top = SLIDE.height - S.slide_pad_cover - px_to_emu(35)
+    add_inline_arrow(slide, S.slide_pad_cover, caption_top, variant="dark")
+
+    cap_scale = T.cover_cap()
+    # 50% black — pre-composite on paper in the RGB.
+    grey = RGBColor(0x80, 0x80, 0x80)
+    caption_text_left = S.slide_pad_cover + px_to_emu(36) + S.cover_arrow_gap
+    _add_text(
+        slide,
+        caption_text_left, caption_top,
+        SLIDE.width - caption_text_left - S.slide_pad_cover, px_to_emu(30),
+        f"Prepared for {spec.get('client', '')} | {spec.get('date', '')}",
+        size_pt=cap_scale["size_px"] * 0.75,
+        weight=cap_scale["weight"],
+        leading=cap_scale["leading"],
+        color=grey,
+        anchor=MSO_ANCHOR.MIDDLE,
+    )
     return slide
 
 
@@ -787,8 +891,9 @@ if __name__ == "__main__":
     # Smoke test — emits a minimal deck covering every primitive layout.
     sample = {
         "slides": [
-            {"layout": "cover", "title": "Next-gen innovation.", "eyebrow": "Commercial proposal",
-             "client": "Demo client", "date": "April 2026", "accent": "pink"},
+            {"layout": "cover", "title": "Next-Generation Coffee Innovation",
+             "subtitle": "Identifying and testing new growth opportunities",
+             "client": "lavazza", "date": "september 2025"},
             {"layout": "context", "tag": "Context",
              "headline": "A single moment of truth.",
              "lead": "Brief, outcome-oriented framing.",

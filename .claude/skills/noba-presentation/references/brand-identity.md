@@ -51,7 +51,7 @@ italics.
 
 | Token | Primary use |
 |---|---|
-| `C.accent_pink`     | Cover headline. One framework card. |
+| `C.accent_pink`     | One framework card (Joy). Not used on covers — covers are ink. |
 | `C.accent_orange`   | Objectives statement. Track 1 dot. |
 | `C.accent_lime`     | Track 2 dot. Framework card 2. |
 | `C.accent_lime_alt` | Alternative lime for framework variants. |

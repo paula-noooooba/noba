@@ -12,19 +12,30 @@ the data shape.
 
 - **JSX:** `web/slides/TitleSlide.jsx`
 - **Builder:** `build_cover` (primitive)
-- **Atoms:** Shell (paper), Logo (dark, cover), Arrow (dark)
+- **Figma:** [NOBA PPT Design System — node 3:5](https://www.figma.com/design/qqNtw4M8gc3zYRHwKJae7W/NOBA-PPT-Design-System?node-id=3-5)
+- **Atoms:** Logo (dark, cover), inline Arrow. **No Shell.**
 - **Data shape:**
   ```py
   {
-    "layout": "cover",
-    "eyebrow": "Commercial proposal",
-    "title": "Next-gen coffee, on the move.",   # accent-coloured
-    "accent": "pink",   # tokens.json key in color.accent.*
-    "client": "Lavazza",
-    "date": "April 2026",
+    "layout":   "cover",
+    "title":    "Next-Generation Coffee Innovation",  # ink, not accent
+    "subtitle": "Identifying and testing new growth opportunities",
+    "client":   "lavazza",
+    "date":     "september 2025",
   }
   ```
-- **Demo:** `web/templates/template-snackin.html` — slide 1
+- **Intentionally not supported:**
+  - `eyebrow` — Figma cover has no eyebrow. Ignore if present in spec.
+  - `accent` — title is always ink (`#1A1A1A`). No accent.
+- **Visual anatomy:**
+  - Full-bleed white, 48 px padding all sides (`slide-pad-cover`).
+  - Logo pinned top-right at 48/48, size 368×48.
+  - Title left-aligned at (48, 322), 1094 px wide, 140 px Helvetica Light.
+  - Subtitle directly below title at y=622, 36 px Helvetica Light.
+  - Caption bottom-left at (48, 997): small arrow then
+    "Prepared for {client} | {date}" in 24 px Helvetica Regular, 50 % black.
+- **Demo:** `web/templates/template-snackin.html` — slide 1 (to be
+  refreshed after the template migration).
 
 ## `context`
 

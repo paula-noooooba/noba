@@ -109,6 +109,9 @@ class T:
             "uppercase": s.get("uppercase", False),
         }
 
+    cover_title = staticmethod(lambda: T._scale("cover-title"))
+    cover_sub   = staticmethod(lambda: T._scale("cover-sub"))
+    cover_cap   = staticmethod(lambda: T._scale("cover-cap"))
     hero        = staticmethod(lambda: T._scale("hero"))
     display     = staticmethod(lambda: T._scale("display"))
     headline    = staticmethod(lambda: T._scale("headline"))

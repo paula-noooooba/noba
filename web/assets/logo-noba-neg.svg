@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 24" width="184" height="24">
+  <!-- NOBA wordmark, light variant for dark backgrounds (#393939, etc.).
+       Same shape as logo-noba.svg, inverted fill/stroke to paper (#FFFFFF). -->
+  <style>
+    text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+           font-size: 24px; font-weight: 400; fill: #FFFFFF; }
+  </style>
+  <text x="0" y="20">N</text>
+  <rect x="22" y="4" width="120" height="16" rx="8" ry="8"
+        fill="none" stroke="#FFFFFF" stroke-width="1.5"/>
+  <text x="146" y="20">BA</text>
+</svg>

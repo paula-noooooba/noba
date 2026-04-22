@@ -4,6 +4,9 @@
 // These are the canonical implementations — design/tokens.json mirrors
 // their values, and scripts/build_deck.py atom helpers reproduce them
 // in python-pptx.
+//
+// Logo + Arrow assets come from web/assets/*.svg, exported from the
+// NOBA PPT Design System Figma file (qqNtw4M8gc3zYRHwKJae7W).
 
 import React from "react";
 
@@ -16,35 +19,35 @@ const midInv = "rgba(255,255,255,0.5)";
 
 const font = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 
-export function Logo({ variant = "dark", position = "inside" }) {
-  const color = variant === "light" ? paper : ink;
-  const top   = position === "cover" ? 60 : 48;
-  const right = position === "cover" ? 72 : 60;
+// Cover scale: 2× Figma (Figma frame is 960×540, our render is 1920×1080).
+// Figma logo: 184.32×24 → 368.64×48 at slide scale. Keep the halves handy
+// for JSX demos at the Figma scale (in web/templates/*.html the slide is
+// 1920×1080 via deck-stage so we use the slide-scale values here).
+export function Logo({ variant = "dark", position = "inside", width = 368, height = 48 }) {
+  const src = variant === "light" ? "../assets/logo-noba-neg.svg"
+                                  : "../assets/logo-noba.svg";
+  const top = position === "cover" ? 48 : 48;
   return (
-    <div style={{
-      position: "absolute", top, right,
-      fontFamily: font, fontWeight: 700, fontSize: 24,
-      letterSpacing: "-0.01em", color,
-    }}>
-      noba
-      <div style={{
-        fontWeight: 400, fontSize: 11, letterSpacing: "0.04em",
-        color, opacity: 0.7, marginTop: 2,
-      }}>
-        a gellify company
-      </div>
-    </div>
+    <img src={src} alt="NOBA"
+         style={{
+           position: "absolute", top, right: 48,
+           width, height, display: "block",
+         }} />
   );
 }
 
-export function Arrow({ variant = "dark" }) {
-  const stroke = variant === "light" ? paper : ink;
+// Stroke-only right arrow. Sits inline before the bottom caption on most
+// slides (including the cover), not at bottom-right of the slide.
+// Figma: 17.84×17.25 at 960 frame → 36×35 at slide scale.
+export function Arrow({ variant = "dark", width = 36, height = 35, opacity = 0.5 }) {
+  const src = variant === "light" ? "../assets/arrow-neg.svg"
+                                  : "../assets/arrow.svg";
   return (
-    <svg style={{ position: "absolute", right: 60, bottom: 48 }}
-         width="80" height="24" viewBox="0 0 80 24" fill="none">
-      <line x1="0" y1="12" x2="74" y2="12" stroke={stroke} strokeWidth="1.5" />
-      <polyline points="66,4 74,12 66,20" stroke={stroke} strokeWidth="1.5" fill="none" />
-    </svg>
+    <img src={src} alt=""
+         style={{
+           display: "inline-block", width, height, opacity,
+           verticalAlign: "middle",
+         }} />
   );
 }
 

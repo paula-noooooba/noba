@@ -121,10 +121,9 @@ def _stub_result() -> tuple[str, DeckSpec]:
         slides=[
             SlideSpec.model_validate({
                 "layout": "cover",
-                "eyebrow": "Commercial proposal",
                 "title": "Stubbed deck.",
-                "accent": "pink",
-                "client": "Test client",
+                "subtitle": "Identifying and testing the service pipeline.",
+                "client": "test client",
                 "date": "April 2026",
             }),
             SlideSpec.model_validate({

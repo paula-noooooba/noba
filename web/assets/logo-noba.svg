@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 24" width="184" height="24">
+  <!-- NOBA wordmark: N, pill/capsule (the abstract "O"), BA.
+       Pulled from Figma file qqNtw4M8gc3zYRHwKJae7W, node 3:11.
+       When the official SVG export ships, replace this file. -->
+  <style>
+    text { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+           font-size: 24px; font-weight: 400; fill: #1A1A1A; }
+  </style>
+  <text x="0" y="20">N</text>
+  <rect x="22" y="4" width="120" height="16" rx="8" ry="8"
+        fill="none" stroke="#1A1A1A" stroke-width="1.5"/>
+  <text x="146" y="20">BA</text>
+</svg>

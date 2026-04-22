@@ -142,7 +142,7 @@ and porting the change to the matching builder.
 | Currency | EUR (`€`) |
 | Slide count | Full spine — no truncation without permission |
 | Methodology phases | 4 (Sense, Shape, Stress, Ship) |
-| Accent for cover headline | `pink` |
+| Cover title colour | Ink `#1A1A1A` — **no accent**. The cover layout does not accept an `accent` field. |
 | Accent for objectives statement | `orange` |
 | Accent for deliverables statement | `blue` |
 | Timeline | 8 weeks |
