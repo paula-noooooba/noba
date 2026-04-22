@@ -8,7 +8,11 @@ trivial and robust.
 Environment:
 - `ANTHROPIC_API_KEY` (required in prod) — Anthropic Messages API key.
 - `NOBA_MODEL` (optional)               — model override. Default:
-                                          `claude-opus-4-7` (D7).
+                                          `claude-sonnet-4-6` (D7).
+                                          Set to `claude-opus-4-7` for
+                                          higher-stakes briefs where
+                                          voice precision matters more
+                                          than cost.
 - `NOBA_STUB_CLAUDE=1` (optional)       — bypass the API, return a
                                           canned two-slide spec. Used
                                           by tests to avoid hitting
@@ -23,7 +27,7 @@ from models.schemas import DeckRequest, DeckSpec, SlideSpec
 from prompts.system_prompt import SYSTEM_PROMPT
 
 
-DEFAULT_MODEL = "claude-opus-4-7"
+DEFAULT_MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 16_000
 
 
