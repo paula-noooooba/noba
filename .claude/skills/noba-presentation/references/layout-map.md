@@ -33,7 +33,9 @@ the data shape.
   - Title left-aligned at (48, 322), 1094 px wide, 140 px Helvetica Light.
   - Subtitle directly below title at y=622, 36 px Helvetica Light.
   - Caption bottom-left at (48, 997): small arrow then
-    "Prepared for {client} | {date}" in 24 px Helvetica Regular, 50 % black.
+    "Prepared for {client} | {date}" in 24 px Helvetica Regular, solid
+    ink `#1A1A1A` (design override of the Figma's 50 % black for full
+    contrast).
 - **Demo:** `web/templates/template-snackin.html` — slide 1 (to be
   refreshed after the template migration).
 

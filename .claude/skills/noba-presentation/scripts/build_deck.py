@@ -337,7 +337,9 @@ def build_cover(prs, spec):
     add_inline_arrow(slide, S.slide_pad_cover, caption_top, variant="dark")
 
     cap_scale = T.cover_cap()
-    grey = RGBColor(0x80, 0x80, 0x80)  # 50% black on paper
+    # Caption is solid ink. Paula's design review overrode the Figma
+    # file's `rgba(0,0,0,0.5)` — she wants full contrast on the bottom
+    # caption, not a faded 50% grey.
     caption_text_left = S.slide_pad_cover + px_to_emu(36) + S.cover_arrow_gap
     _add_text(
         slide,
@@ -347,7 +349,7 @@ def build_cover(prs, spec):
         size_pt=cap_scale["size_px"] * 0.75,
         weight=cap_scale["weight"],
         leading=cap_scale["leading"],
-        color=grey,
+        color=C.neutral_ink,
         anchor=MSO_ANCHOR.MIDDLE,
     )
     return slide

@@ -58,7 +58,7 @@ export default function TitleSlide({
         position: "absolute", left: 48, bottom: 48,
         display: "flex", alignItems: "center", gap: 20,
         fontFamily: font, fontWeight: 400, fontSize: 24,
-        color: "rgba(0,0,0,0.5)",
+        color: "#1A1A1A",
       }}>
         <Arrow variant="dark" />
         <span>Prepared for {client} | {date}</span>

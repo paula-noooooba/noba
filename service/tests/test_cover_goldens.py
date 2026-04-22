@@ -94,6 +94,23 @@ def test_no_eyebrow_commercial_proposal(cover_pptx):
     assert "Commercial proposal" not in _all_text(cover_pptx)
 
 
+def test_caption_is_ink_not_grey(cover_pptx):
+    """Caption color is full ink #1A1A1A — deliberate override of the
+    Figma spec (which had rgba(0,0,0,0.5) / 50% grey)."""
+    for slide in cover_pptx.slides:
+        for shape in slide.shapes:
+            if shape.has_text_frame:
+                for p in shape.text_frame.paragraphs:
+                    for r in p.runs:
+                        if "Prepared for" in r.text:
+                            rgb = r.font.color.rgb
+                            assert str(rgb).upper() == "1A1A1A", (
+                                f"Caption colour is {rgb}, expected 1A1A1A (ink)."
+                            )
+                            return
+    pytest.fail("Could not find the caption run to check colour.")
+
+
 def test_title_is_ink_not_accent(cover_pptx):
     """Title text colour must be ink #1A1A1A. If someone reintroduces
     the accent behaviour this will flag."""
