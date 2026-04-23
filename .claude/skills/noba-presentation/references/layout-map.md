@@ -43,19 +43,48 @@ the data shape.
 
 - **JSX:** `web/slides/ContextSlide.jsx`
 - **Builder:** `build_context`
-- **Atoms:** Logo (dark), Tag, Arrow (dark) + photo placeholder
+- **Figma:** [NOBA PPT Design System — node 1:230](https://www.figma.com/design/qqNtw4M8gc3zYRHwKJae7W/NOBA-PPT-Design-System?node-id=1-230)
+- **Atoms:** inline Arrow (top-left), Logo (dark, inside — smaller 228×30 size),
+  right-edge photo with left-rounded corners.
 - **Data shape:**
   ```py
   {
     "layout": "context",
-    "tag": "Context",
-    "headline": "Healthy snacking is crowded.",     # big
-    "lead": "Three SKUs are ready.",                 # 23px
-    "body": "We want to know which hero SKU earns…",# 17px
-    # image: future — path under web/assets/
+    "tag":    "CONTEXT",                         # uppercase, 26px tracked
+    "image":  "path/to/photo.jpg",               # optional; gray placeholder if missing
+    "body":   [                                  # list[list[{text, bold?}]]
+      [
+        {"text": "Lavazza aims to expand…", "bold": True},
+        {"text": " The goal is to elevate…"}
+      ],
+      [
+        {"text": "BEYOND SIMPLE TRANSACTIONS\n", "bold": True},
+        {"text": "Vending is evolving across industries…"}
+      ],
+      [
+        {"text": "Lavazza has the opportunity…"},
+        {"text": "not just as a point of sale, but…", "bold": True},
+        {"text": " Whether through souvenir-ready…"}
+      ],
+    ],
   }
   ```
-- **Demo:** template-snackin, slide 2
+- **Intentionally not supported:**
+  - `headline` — the Figma Context layout has no headline. Dense body
+    copy only.
+  - `lead`, plain `body` string — replaced by the `body` rich-text
+    structure above.
+- **Visual anatomy:**
+  - Full-bleed white, 48 px padding for the top strip.
+  - Photo pinned flush right, 768×1080 px at slide scale, rounded on
+    the left corners only (`ROUND_2_SAME_RECTANGLE` rotated 270°).
+  - Top-left: inline arrow (36×35) + uppercase CONTEXT tag (26 px
+    Helvetica Regular, tracked 0.068em).
+  - Top-right: inside-slide logo (228×30).
+  - Body: 912 px wide column starting at y=160, body at 28 px / 1.43
+    leading, bold mixed inline via `_add_rich_text`.
+- **Demo:** template-snackin, slide 2 (to refresh when porting the
+  other slides).
 
 ## `content_cards`
 

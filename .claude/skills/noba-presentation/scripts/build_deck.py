@@ -73,14 +73,24 @@ def add_logo(slide, variant: str = "dark", position: str = "inside"):
     (dark for paper backgrounds, neg for dark backgrounds). Falls back
     to a shape-drawn stand-in when the asset is missing — Paula has
     flagged the stand-in as "not the logo" so the real PNG is required
-    for brand-accurate output. Figma source: node 3:11 of
-    qqNtw4M8gc3zYRHwKJae7W. 368×48 px at slide scale; top-right with
-    a 48-px padding on both sides for `cover`, 60/48 for `inside`.
+    for brand-accurate output.
+
+    Sizes differ by position (from the Figma design system):
+    - `cover` uses the large wordmark: 368×48 at slide scale
+      (Figma 184×24 at 960 frame, node 3:11).
+    - `inside` uses a smaller wordmark: 228×30 at slide scale
+      (Figma 114×15 at 960 frame, node 1:261). Inside slides have less
+      space in the header strip so the logo is trimmed to fit.
+
+    In both positions the logo pins to the right edge of the 48-px
+    cover/inside padding.
     """
-    w = S.cover_logo_width
-    h = S.cover_logo_height
-    pad_right = S.slide_pad_cover if position == "cover" else px_to_emu(60)
-    pad_top   = S.slide_pad_cover if position == "cover" else px_to_emu(48)
+    if position == "cover":
+        w, h = S.cover_logo_width, S.cover_logo_height
+    else:
+        w, h = S.inside_logo_width, S.inside_logo_height
+    pad_right = S.slide_pad_cover
+    pad_top   = S.slide_pad_cover
     left = SLIDE.width - pad_right - w
     top = pad_top
 
@@ -262,6 +272,42 @@ def _add_text(slide, left, top, width, height, text: str, *,
     return box
 
 
+def _add_rich_text(tf, paragraphs, *, size_pt: float, leading: float = 1.43,
+                   color=None, weight: int = 400):
+    """Populate a text-frame with mixed-bold paragraphs.
+
+    paragraphs: list[list[dict]]
+        Each outer list is one paragraph; each inner dict is a run with
+        keys `text` (str, required) and `bold` (bool, optional).
+
+    The text frame's existing first paragraph is used for paragraphs[0]
+    to avoid a blank line at the top. All runs share the same font
+    family (Helvetica Neue), size, and color — the only per-run variable
+    is `bold`.
+
+    Used by build_context for the long multi-paragraph body with
+    emphasised phrases.
+    """
+    color = color or C.neutral_ink
+    tf.margin_top = tf.margin_bottom = tf.margin_left = tf.margin_right = 0
+    tf.word_wrap = True
+
+    for i, para in enumerate(paragraphs):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.line_spacing = leading
+        for run_spec in para:
+            text = run_spec.get("text", "")
+            if not text:
+                continue
+            bold = bool(run_spec.get("bold"))
+            r = p.add_run()
+            r.text = text
+            r.font.name = _font_for_weight(700 if bold else weight)
+            r.font.bold = bold
+            r.font.size = Pt(size_pt)
+            r.font.color.rgb = color
+
+
 def _pct(n: int, denom: int = 1920) -> int:
     """px → EMU helper for inline math."""
     return px_to_emu(n * SLIDE.width_px / denom)
@@ -356,44 +402,98 @@ def build_cover(prs, spec):
 
 
 def build_context(prs, spec):
-    """← web/slides/ContextSlide.jsx"""
+    """← web/slides/ContextSlide.jsx
+
+    Figma source: qqNtw4M8gc3zYRHwKJae7W, node 1:230.
+
+    Spec fields:
+        tag   (str)                      — uppercase label after the
+                                           top-left inline arrow.
+                                           Defaults to "CONTEXT".
+        image (str, optional)            — path to a photo. When
+                                           present, embedded into the
+                                           right-edge photo slot. When
+                                           missing, a gray placeholder
+                                           shape is used.
+        body  (list[list[dict]], required)
+            Paragraphs of rich text. Each paragraph is a list of
+            {"text": str, "bold": bool} runs. See layout-map.md.
+
+    Visual anatomy:
+        - Full-bleed white, 48-px padding for the header strip.
+        - Photo pinned flush to the right edge, 768×1080 px at slide
+          scale, rounded on the left corners only.
+        - Top-left: inline arrow + uppercase CONTEXT tag.
+        - Top-right: smaller inside-slide logo (228×30 at slide scale).
+        - Body: 456-px (Figma) / 912-px (slide) column, 14/20 px body
+          type with bold emphasis within paragraphs.
+    """
     slide = prs.slides.add_slide(prs.slide_layouts[6])
-    add_logo(slide, variant="dark")
-    add_tag(slide, spec.get("tag", "Context"), px_to_emu(72), px_to_emu(60))
 
-    left_col_w = px_to_emu(1022)
+    # Photo — right-edge, full-height. Rounded only on the left corners
+    # in the Figma. python-pptx's MSO_SHAPE.ROUND_2_SAME_RECTANGLE puts
+    # both rounded corners on the top side; rotating 270° moves them to
+    # the left. For the initial build we use a gray placeholder; a real
+    # image at spec["image"] is embedded as a Picture (no rounded
+    # corners yet — see TODO).
+    photo_w = S.context_photo_width
+    photo_left = SLIDE.width - photo_w
+    image_path = spec.get("image")
+    if image_path and Path(image_path).exists():
+        slide.shapes.add_picture(
+            str(image_path), photo_left, 0, photo_w, SLIDE.height
+        )
+        # TODO: mask this picture with rounded-left-side corners. Until
+        # then, a real embedded image renders with square corners.
+    else:
+        placeholder = slide.shapes.add_shape(
+            MSO_SHAPE.ROUND_2_SAME_RECTANGLE,
+            photo_left, 0, photo_w, SLIDE.height,
+        )
+        placeholder.rotation = 270  # rotate so the rounded corners sit on the left
+        placeholder.fill.solid()
+        placeholder.fill.fore_color.rgb = C.neutral_card
+        placeholder.line.fill.background()
+
+    # Top row — arrow + CONTEXT label (top-left) and logo (top-right).
+    top_y = S.slide_pad_cover
+    add_inline_arrow(slide, S.slide_pad_cover, top_y, variant="dark")
+
+    tag_scale = T.context_tag()
+    tag_left = S.slide_pad_cover + S.cover_arrow_width + S.context_top_gap
     _add_text(
-        slide, px_to_emu(72), px_to_emu(192), left_col_w, px_to_emu(280),
-        spec["headline"],
-        size_pt=T.headline()["size_px"] * 0.75, weight=300, leading=1.05,
+        slide,
+        tag_left, top_y,
+        px_to_emu(600), S.cover_arrow_height,
+        spec.get("tag", "Context"),
+        size_pt=tag_scale["size_px"] * 0.75,
+        weight=tag_scale["weight"],
+        leading=tag_scale["leading"],
+        tracking=tag_scale["tracking"],
+        uppercase=True,
+        color=C.neutral_ink,
+        anchor=MSO_ANCHOR.MIDDLE,
     )
-    if spec.get("lead"):
-        _add_text(
-            slide, px_to_emu(72), px_to_emu(480), left_col_w, px_to_emu(100),
-            spec["lead"],
-            size_pt=T.lead()["size_px"] * 0.75, leading=1.4,
+
+    add_logo(slide, variant="dark", position="inside")
+
+    # Body — multi-paragraph rich text with bold emphasis.
+    body = spec.get("body")
+    if body:
+        body_box = slide.shapes.add_textbox(
+            S.slide_pad_cover, S.context_body_top,
+            S.context_body_width,
+            SLIDE.height - S.context_body_top - S.slide_pad_cover,
         )
-    if spec.get("body"):
-        _add_text(
-            slide, px_to_emu(72), px_to_emu(600), left_col_w, px_to_emu(280),
-            spec["body"],
-            size_pt=T.body()["size_px"] * 0.75, leading=1.62,
+        body_scale = T.context_body()
+        _add_rich_text(
+            body_box.text_frame, body,
+            size_pt=body_scale["size_px"] * 0.75,
+            leading=body_scale["leading"],
+            color=C.neutral_ink,
+            weight=body_scale["weight"],
         )
 
-    # Photo placeholder
-    img_shape = slide.shapes.add_shape(
-        MSO_SHAPE.ROUNDED_RECTANGLE,
-        SLIDE.width - px_to_emu(60) - px_to_emu(706),
-        px_to_emu(60),
-        px_to_emu(706),
-        SLIDE.height - px_to_emu(120),
-    )
-    img_shape.fill.solid()
-    img_shape.fill.fore_color.rgb = C.neutral_card
-    img_shape.line.fill.background()
-    # TODO: replace with slide.shapes.add_picture(...) once web/assets/ has photos.
-
-    add_arrow(slide)
     return slide
 
 
