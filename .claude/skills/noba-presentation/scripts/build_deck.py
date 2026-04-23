@@ -430,12 +430,15 @@ def build_context(prs, spec):
     """
     slide = prs.slides.add_slide(prs.slide_layouts[6])
 
-    # Photo — right-edge, full-height. Rounded only on the left corners
-    # in the Figma. python-pptx's MSO_SHAPE.ROUND_2_SAME_RECTANGLE puts
-    # both rounded corners on the top side; rotating 270° moves them to
-    # the left. For the initial build we use a gray placeholder; a real
-    # image at spec["image"] is embedded as a Picture (no rounded
-    # corners yet — see TODO).
+    # Photo — right-edge, full-height. The Figma design rounds only the
+    # left corners; python-pptx can't easily express "rounded on one
+    # side only" without XML surgery (tried `ROUND_2_SAME_RECTANGLE +
+    # rotation` but rotation repositions the shape). Pragmatic compromise
+    # for the placeholder: a regular ROUNDED_RECTANGLE with a small
+    # 32 px radius — the right corners are subtly rounded too, but the
+    # visual impact at that radius on a 768-wide shape is tiny (4%).
+    # A real embedded image (spec["image"]) renders square-cornered
+    # until we wire a shape-mask via XML surgery.
     photo_w = S.context_photo_width
     photo_left = SLIDE.width - photo_w
     image_path = spec.get("image")
@@ -443,14 +446,16 @@ def build_context(prs, spec):
         slide.shapes.add_picture(
             str(image_path), photo_left, 0, photo_w, SLIDE.height
         )
-        # TODO: mask this picture with rounded-left-side corners. Until
-        # then, a real embedded image renders with square corners.
+        # TODO: mask this picture with a rounded-left-side clip.
     else:
         placeholder = slide.shapes.add_shape(
-            MSO_SHAPE.ROUND_2_SAME_RECTANGLE,
+            MSO_SHAPE.ROUNDED_RECTANGLE,
             photo_left, 0, photo_w, SLIDE.height,
         )
-        placeholder.rotation = 270  # rotate so the rounded corners sit on the left
+        # Rounded-rectangle adjustment[0] is a fraction of half the
+        # shorter dimension. 32 px radius on a 768-wide shape:
+        #   adj = 32 / (768 / 2) = 0.0833
+        placeholder.adjustments[0] = 32 / (768 / 2)
         placeholder.fill.solid()
         placeholder.fill.fore_color.rgb = C.neutral_card
         placeholder.line.fill.background()
