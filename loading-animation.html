@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOBA – Loading Animation</title>
+
+<!--
+  ╔═══════════════════════════════════════════════════════════════╗
+  ║  NOBA PRELOADER – WordPress / Elementor Pro Integration       ║
+  ║                                                               ║
+  ║  HOW TO ADD TO ELEMENTOR PRO:                                 ║
+  ║  1. Go to Elementor > Custom Code > Add New                  ║
+  ║  2. Set Location to "Before </body>"                         ║
+  ║  3. Copy everything between the COPY START / COPY END marks  ║
+  ║  4. Paste and save – apply to desired pages/templates        ║
+  ║                                                               ║
+  ║  HOW TO ADD REAL IMAGES:                                      ║
+  ║  For each .card-N in the HTML, replace the placeholder        ║
+  ║  background colour with your WordPress media URL:            ║
+  ║    background: url('https://yoursite.com/wp-content/...jpg') ║
+  ║                center/cover no-repeat;                        ║
+  ║  Or drop an <img> tag inside each card div.                  ║
+  ╚═══════════════════════════════════════════════════════════════╝
+-->
+
+<style>
+/* ── Reset ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ── Demo page content (remove in WordPress – Elementor handles this) ── -->
+<div id="site-content" style="visibility:hidden; min-height:100vh; display:flex; align-items:center; justify-content:center;">
+  <h1 style="font-family:sans-serif; font-size:3rem; color:#111;">Welcome to NOBA</h1>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+  ▼▼▼  COPY START – paste this block into Elementor Custom Code  ▼▼▼
+════════════════════════════════════════════════════════════════ -->
+
+<style id="noba-preloader-css">
+
+/* ── Full-screen overlay ──────────────────────────────────────── */
+#noba-preloader {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 99999;
+  overflow: hidden;
+  /* prevent flash of unstyled content on slow connections */
+  opacity: 1;
+}
+
+/*
+  Stage = zero-size div sitting exactly at viewport centre.
+  All cards are absolutely positioned relative to it.
+  GSAP animates their x / y transforms.
+*/
+#noba-stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.noba-card {
+  position: absolute;
+  overflow: hidden;
+  will-change: transform, opacity;
+  /* xPercent / yPercent set in JS keeps each card centred on the stage */
+}
+
+/* ── Card sizes & placeholder colours ──────────────────────────
+   Replace the background shorthand with your real image URL, e.g.
+   background: url('https://yoursite.com/wp-content/uploads/img.jpg')
+               center/cover no-repeat;
+   ──────────────────────────────────────────────────────────── */
+.card-1 { width: 280px; height: 195px; background: #8BA7C8 center/cover no-repeat; } /* Japanese sign / golden leaves  */
+.card-2 { width: 200px; height: 235px; background: #1C2C3A center/cover no-repeat; } /* Anime eyes (manga)             */
+.card-3 { width: 350px; height: 215px; background: #0F1B28 center/cover no-repeat; } /* Monster truck                  */
+.card-4 { width: 195px; height: 195px; background: #D4913A center/cover no-repeat; } /* Hand holding wrench            */
+.card-5 { width: 255px; height: 325px; background: #4A6E5A center/cover no-repeat; } /* Person with sunglasses         */
+.card-6 { width: 220px; height: 255px; background: #C96B8A center/cover no-repeat; } /* Pink cartoon bear              */
+.card-7 { width: 270px; height: 200px; background: #6B8EB0 center/cover no-repeat; } /* Cat in lily-pond (Monet-style) */
+.card-8 { width: 185px; height: 220px; background: #C4A878 center/cover no-repeat; } /* Rabbit with butterfly          */
+.card-9 { width: 215px; height: 205px; background: #5A8060 center/cover no-repeat; } /* Green cartoon monster          */
+
+/* ── Text tagline ───────────────────────────────────────────── */
+#noba-tagline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.noba-word {
+  display: inline-block;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(2.8rem, 5.5vw, 6rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #111111;
+  /* GSAP animates opacity and y from these starting values */
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+</style>
+
+<div id="noba-preloader" aria-hidden="true" role="status" aria-label="Loading">
+
+  <div id="noba-stage">
+    <div class="noba-card card-1"></div>
+    <div class="noba-card card-2"></div>
+    <div class="noba-card card-3"></div>
+    <div class="noba-card card-4"></div>
+    <div class="noba-card card-5"></div>
+    <div class="noba-card card-6"></div>
+    <div class="noba-card card-7"></div>
+    <div class="noba-card card-8"></div>
+    <div class="noba-card card-9"></div>
+  </div>
+
+  <div id="noba-tagline">
+    <span class="noba-word" id="word-we">We</span>
+    <span class="noba-word" id="word-are">are</span>
+    <span class="noba-word" id="word-noba">NOBA</span>
+  </div>
+
+</div>
+
+<!-- GSAP 3 – free, no account needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+        integrity="sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script id="noba-preloader-js">
+(function () {
+  'use strict';
+
+  /* ── Tuneable constants ──────────────────────────────────────── */
+  var SCATTER_START  = 0.30;   // seconds of initial pause before cards move
+  var CCW_STRENGTH   = 0.36;   // counterclockwise arc intensity (0 = straight line)
+  var TEXT_STAGGER   = 0.38;   // seconds between each word appearing
+  var HOLD_AFTER_TXT = 1.4;    // seconds to hold the full tagline before fade-out
+  var FADE_DURATION  = 0.65;   // preloader fade-out duration
+
+  /* ── Card definitions ───────────────────────────────────────────
+     start: initial x/y offset (px) from viewport centre – the cluster
+     end:   final x/y position (px) from viewport centre – off-screen
+     r:     rotation (degrees)
+     dur:   scatter animation duration (seconds)
+     dly:   per-card additional delay (seconds) – gives staggered feel
+     z:     stacking order while clustered (higher = in front)
+  ────────────────────────────────────────────────────────────── */
+  var CARDS = [
+    /* 1 – Japanese street sign / golden leaves → top-left */
+    { sel: '.card-1', z: 5,
+      start: { x: -18, y: -42, r: -8  },
+      end:   { x: -790, y: -385, r: -13 },
+      dur: 2.0, dly: 0.00 },
+
+    /* 2 – Anime eyes (manga) → bottom-left */
+    { sel: '.card-2', z: 3,
+      start: { x: -12, y:  38, r:  6  },
+      end:   { x: -510, y:  550, r:  16 },
+      dur: 2.3, dly: 0.10 },
+
+    /* 3 – Monster truck → upper-right (fastest) */
+    { sel: '.card-3', z: 6,
+      start: { x:  46, y: -42, r:  7  },
+      end:   { x:  880, y: -345, r:   4 },
+      dur: 1.8, dly: 0.05 },
+
+    /* 4 – Hand holding wrench (illustration) → top-centre */
+    { sel: '.card-4', z: 4,
+      start: { x:   8, y: -52, r: -4  },
+      end:   { x:  275, y: -570, r: -11 },
+      dur: 2.1, dly: 0.12 },
+
+    /* 5 – Person with sunglasses → left */
+    { sel: '.card-5', z: 7,
+      start: { x: -52, y:  16, r:  4  },
+      end:   { x: -820, y:  118, r:   9 },
+      dur: 2.0, dly: 0.08 },
+
+    /* 6 – Pink cartoon bear → lower-left (slowest) */
+    { sel: '.card-6', z: 2,
+      start: { x: -56, y:  52, r: -10 },
+      end:   { x: -755, y:  505, r: -21 },
+      dur: 2.4, dly: 0.18 },
+
+    /* 7 – Cat in lily-pond (Monet) → right */
+    { sel: '.card-7', z: 8,
+      start: { x:  52, y:  28, r:  5  },
+      end:   { x:  770, y:  408, r:  13 },
+      dur: 2.2, dly: 0.14 },
+
+    /* 8 – Rabbit with butterfly → bottom-centre */
+    { sel: '.card-8', z: 1,
+      start: { x:  13, y:  58, r: -6  },
+      end:   { x:  108, y:  630, r: -16 },
+      dur: 2.3, dly: 0.20 },
+
+    /* 9 – Green cartoon monster → lower-right */
+    { sel: '.card-9', z: 9,
+      start: { x:  50, y:  54, r:  12 },
+      end:   { x:  648, y:  548, r:  23 },
+      dur: 2.0, dly: 0.10 }
+  ];
+
+  /* ── Counterclockwise arc control-point ─────────────────────────
+     For a straight line from S→E, we offset the 40%-along midpoint
+     by a perpendicular vector rotated 90° CCW in screen coordinates
+     (where CCW perpendicular of (dx,dy) is (dy, -dx)).
+     This makes every card trace a counterclockwise curved arc.
+  ────────────────────────────────────────────────────────────── */
+  function ccwArcPoint(sx, sy, ex, ey, strength) {
+    var t   = 0.40;
+    var mx  = sx + (ex - sx) * t;
+    var my  = sy + (ey - sy) * t;
+    var dx  = ex - sx;
+    var dy  = ey - sy;
+    var len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 1) return { x: sx, y: sy };
+    /* CCW perpendicular in screen coords: (dy, -dx) */
+    var px  = dy / len;
+    var py  = -dx / len;
+    return {
+      x: mx + px * len * strength,
+      y: my + py * len * strength
+    };
+  }
+
+  /* ── Initialise: set every card to its clustered starting state ── */
+  CARDS.forEach(function (c) {
+    gsap.set(c.sel, {
+      xPercent: -50,   /* centres card on the zero-size stage div */
+      yPercent: -50,
+      x: c.start.x,
+      y: c.start.y,
+      rotation: c.start.r,
+      scale: 0.78,     /* cards start slightly scaled-down for a denser cluster */
+      zIndex: c.z
+    });
+  });
+
+  /* ── Build the master timeline ──────────────────────────────── */
+  var tl = gsap.timeline({
+    onComplete: revealPage
+  });
+
+  /* Phase 1 – scatter cards with CCW arc paths */
+  CARDS.forEach(function (c) {
+    var cp = ccwArcPoint(c.start.x, c.start.y, c.end.x, c.end.y, CCW_STRENGTH);
+
+    tl.to(c.sel, {
+      keyframes: [
+        /* leg 1: swing through the CCW arc point (accelerate) */
+        {
+          x: cp.x,
+          y: cp.y,
+          scale: 0.92,
+          duration: c.dur * 0.42,
+          ease: 'power1.in'
+        },
+        /* leg 2: continue outward to final off-screen destination */
+        {
+          x: c.end.x,
+          y: c.end.y,
+          rotation: c.end.r,
+          scale: 1.0,
+          duration: c.dur * 0.58,
+          ease: 'power2.out'
+        }
+      ]
+    }, SCATTER_START + c.dly);
+  });
+
+  /* Phase 2 – reveal tagline words one by one */
+  var textStart = SCATTER_START + 1.75; /* centre clears of cards around here */
+
+  ['#word-we', '#word-are', '#word-noba'].forEach(function (id, i) {
+    tl.to(id, {
+      opacity: 1,
+      y: 0,
+      duration: 0.55,
+      ease: 'power3.out'
+    }, textStart + i * TEXT_STAGGER);
+  });
+
+  /* Phase 3 – hold, then onComplete fires revealPage() */
+  var lastCardEnd  = SCATTER_START + Math.max.apply(null, CARDS.map(function (c) { return c.dly + c.dur; }));
+  var lastWordEnd  = textStart + 2 * TEXT_STAGGER + 0.55;
+  var animationEnd = Math.max(lastCardEnd, lastWordEnd);
+  var holdUntil    = animationEnd + HOLD_AFTER_TXT;
+
+  if (tl.duration() < holdUntil) {
+    tl.to({}, { duration: holdUntil - tl.duration() });
+  }
+
+  /* ── Reveal page and remove preloader overlay ────────────────── */
+  function revealPage() {
+    /* In WordPress the page content is always visible;
+       this targets the demo #site-content div only. */
+    var content = document.getElementById('site-content');
+    if (content) content.style.visibility = 'visible';
+
+    gsap.to('#noba-preloader', {
+      opacity: 0,
+      duration: FADE_DURATION,
+      ease: 'power1.inOut',
+      onComplete: function () {
+        var el = document.getElementById('noba-preloader');
+        if (el) {
+          el.style.display = 'none';
+          el.setAttribute('aria-hidden', 'true');
+        }
+      }
+    });
+  }
+
+  /* ── Graceful fallback: if page takes > 8 s, skip the animation ─ */
+  var safetyTimer = setTimeout(function () {
+    tl.progress(1);
+  }, 8000);
+
+  tl.eventCallback('onComplete', function () {
+    clearTimeout(safetyTimer);
+    revealPage();
+  });
+
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════
+  ▲▲▲  COPY END                                                  ▲▲▲
+════════════════════════════════════════════════════════════════ -->
+
+</body>
+</html>
